@@ -230,10 +230,7 @@ namespace GaussianSplatting.Runtime
 
         public struct ChunkInfo
         {
-            public uint colR, colG, colB, colA;
             public float2 posX, posY, posZ;
-            public uint sclX, sclY, sclZ;
-            public uint shR, shG, shB;
         }
 
         [Serializable]

@@ -24,4 +24,6 @@
 /projects/**/Temp/*
 /projects/**/UserSettings/*
 /projects/**/obj/*
+/projects/**/.vs
+/projects/**/.vsconfig
 *.sln.DotSettings.user

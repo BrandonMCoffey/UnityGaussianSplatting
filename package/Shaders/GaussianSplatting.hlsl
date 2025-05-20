@@ -195,10 +195,7 @@ uint3 SplatIndexToPixelIndex(uint idx)
 
 struct SplatChunkInfo
 {
-    uint colR, colG, colB, colA;
     float2 posX, posY, posZ;
-    uint sclX, sclY, sclZ;
-    uint shR, shG, shB;
 };
 
 StructuredBuffer<SplatChunkInfo> _SplatChunks;
@@ -463,7 +460,7 @@ SplatData LoadSplatData(uint idx)
     s.pos       = LoadSplatPosValue(idx);
     s.rot       = DecodeRotation(DecodePacked_10_10_10_2(LoadUInt(_SplatOther, otherAddr)));
     s.scale     = LoadAndDecodeVector(_SplatOther, otherAddr + 4, scaleFmt);
-    half4 col   = LoadSplatColTex(coord);
+    half4 col = LoadSplatColTex(coord);
 
     uint shIndex = idx;
     if (shFormat > VECTOR_FMT_6)
@@ -568,41 +565,10 @@ SplatData LoadSplatData(uint idx)
         SplatChunkInfo chunk = _SplatChunks[chunkIdx];
         float3 posMin = float3(chunk.posX.x, chunk.posY.x, chunk.posZ.x);
         float3 posMax = float3(chunk.posX.y, chunk.posY.y, chunk.posZ.y);
-        half3 sclMin = half3(f16tof32(chunk.sclX    ), f16tof32(chunk.sclY    ), f16tof32(chunk.sclZ    ));
-        half3 sclMax = half3(f16tof32(chunk.sclX>>16), f16tof32(chunk.sclY>>16), f16tof32(chunk.sclZ>>16));
-        half4 colMin = half4(f16tof32(chunk.colR    ), f16tof32(chunk.colG    ), f16tof32(chunk.colB    ), f16tof32(chunk.colA    ));
-        half4 colMax = half4(f16tof32(chunk.colR>>16), f16tof32(chunk.colG>>16), f16tof32(chunk.colB>>16), f16tof32(chunk.colA>>16));
-        half3 shMin = half3(f16tof32(chunk.shR    ), f16tof32(chunk.shG    ), f16tof32(chunk.shB    ));
-        half3 shMax = half3(f16tof32(chunk.shR>>16), f16tof32(chunk.shG>>16), f16tof32(chunk.shB>>16));
         s.pos = lerp(posMin, posMax, s.pos);
-        s.scale     = lerp(sclMin, sclMax, s.scale);
-        s.scale *= s.scale;
-        s.scale *= s.scale;
-        s.scale *= s.scale;
-        col   = lerp(colMin, colMax, col);
-        col.a = InvSquareCentered01(col.a);
-
-        if (shFormat > VECTOR_FMT_32F && shFormat <= VECTOR_FMT_6)
-        {
-            s.sh.sh1    = lerp(shMin, shMax, s.sh.sh1 );
-            s.sh.sh2    = lerp(shMin, shMax, s.sh.sh2 );
-            s.sh.sh3    = lerp(shMin, shMax, s.sh.sh3 );
-            s.sh.sh4    = lerp(shMin, shMax, s.sh.sh4 );
-            s.sh.sh5    = lerp(shMin, shMax, s.sh.sh5 );
-            s.sh.sh6    = lerp(shMin, shMax, s.sh.sh6 );
-            s.sh.sh7    = lerp(shMin, shMax, s.sh.sh7 );
-            s.sh.sh8    = lerp(shMin, shMax, s.sh.sh8 );
-            s.sh.sh9    = lerp(shMin, shMax, s.sh.sh9 );
-            s.sh.sh10   = lerp(shMin, shMax, s.sh.sh10);
-            s.sh.sh11   = lerp(shMin, shMax, s.sh.sh11);
-            s.sh.sh12   = lerp(shMin, shMax, s.sh.sh12);
-            s.sh.sh13   = lerp(shMin, shMax, s.sh.sh13);
-            s.sh.sh14   = lerp(shMin, shMax, s.sh.sh14);
-            s.sh.sh15   = lerp(shMin, shMax, s.sh.sh15);
-        }
     }
-    s.opacity   = col.a;
-    s.sh.col    = col.rgb;
+    s.opacity = col.a;
+    s.sh.col = col.rgb;
 
     return s;
 }
